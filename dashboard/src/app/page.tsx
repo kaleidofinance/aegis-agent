@@ -6,14 +6,17 @@ import { SettingsView } from '../components/SettingsView';
 import { ForensicIntel } from '../components/ForensicIntel';
 import { EconomicEngine } from '../components/EconomicEngine';
 import { AegisSovereignty } from '../components/AegisSovereignty';
+import { WalletManager } from '../components/WalletManager';
+import { RemediationLab } from '../components/RemediationLab';
+import { GlowButton } from '../components/GlowButton';
 import {
   Shield, Activity, Search, Zap, AlertTriangle, CheckCircle2,
   ChevronRight, ExternalLink, Clock, TrendingUp, Lock,
-  FileCode, Eye, BarChart3, Terminal, Settings, Bell
+  FileCode, Eye, BarChart3, Terminal, Settings, Bell, Key
 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────
-type Mode = 'overview' | 'audit' | 'forensics' | 'stress';
+type Mode = 'overview' | 'audit' | 'forensics' | 'stress' | 'wallets';
 
 interface ThreatEntry {
   id: string;
@@ -33,7 +36,6 @@ const THREATS: ThreatEntry[] = [
   { id: 'THR-005', type: 'Slippage Exploit', severity: 'low', target: 'Router.sol', status: 'resolved', timestamp: '35m ago' },
 ];
 
-// ── Severity Styling ───────────────────────────────────────
 const severityConfig = {
   critical: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', dot: 'bg-red-500' },
   high: { bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400', dot: 'bg-orange-500' },
@@ -94,43 +96,19 @@ export default function AegisDashboard() {
     return () => clearInterval(interval);
   }, [logs]);
 
-  // Handle Human Directive Granting to Backend
-  const pending = status?.pending_directive;
-  const isPaused = status?.status === "PAUSED";
-  
-  const handleApprove = async () => {
-    if (!pending) return;
-    try {
-      const res = await fetch('/api/directive', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mission_id: pending.mission_id,
-          phase_id: pending.phase_id,
-          action: 'GRANT'
-        })
-      });
-      if (res.ok) {
-        console.log("Directive GRANTED.");
-      }
-    } catch (err) {
-      console.error("Failed to map directive.");
-    }
-  };
-
   const navItems: { id: Mode; icon: React.ElementType; label: string }[] = [
     { id: 'overview', icon: BarChart3, label: 'Overview' },
     { id: 'audit', icon: FileCode, label: 'Audit' },
     { id: 'forensics', icon: Search, label: 'Forensics' },
     { id: 'stress', icon: Zap, label: 'Stress Test' },
+    { id: 'wallets', icon: Key, label: 'Wallets' },
   ];
 
   return (
-    <div className="flex h-screen bg-[#0a0d0b] text-white overflow-hidden">
+    <div className="flex h-screen bg-[#0a0d0b] text-white overflow-hidden relative">
 
       {/* ── Sidebar ────────────────────────────────────── */}
-      <aside className="w-[220px] shrink-0 border-r border-white/[0.06] flex flex-col bg-[#0c0f0d]">
-        {/* Brand */}
+      <aside className="w-[220px] shrink-0 border-r border-white/[0.06] flex flex-col bg-[#0c0f0d] z-20">
         <div className="px-5 py-6 border-b border-white/[0.06]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
@@ -143,7 +121,6 @@ export default function AegisDashboard() {
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navItems.map((item) => {
             const isActive = activeMode === item.id && !showSettings;
@@ -167,7 +144,6 @@ export default function AegisDashboard() {
           })}
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="px-3 py-4 border-t border-white/[0.06] space-y-1">
           <button 
             onClick={() => setShowSettings(true)}
@@ -187,7 +163,7 @@ export default function AegisDashboard() {
       </aside>
 
       {/* ── Main Content ───────────────────────────────── */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main className="flex-1 flex flex-col overflow-hidden relative z-10">
 
         {/* Top Bar */}
         <header className="h-14 shrink-0 border-b border-white/[0.06] flex items-center justify-between px-6 bg-[#0c0f0d]/50 backdrop-blur-sm relative z-20">
@@ -196,7 +172,7 @@ export default function AegisDashboard() {
             <div className="h-4 w-px bg-white/10" />
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] text-emerald-400 font-medium">{isPaused ? 'Awaiting Human Directive' : 'All Systems Nominal'}</span>
+              <span className="text-[11px] text-emerald-400 font-medium">{status?.status === "PAUSED" ? 'Awaiting Human Directive' : 'All Systems Nominal'}</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -209,13 +185,13 @@ export default function AegisDashboard() {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto w-full relative z-10">
+        <div className="flex-1 overflow-y-auto w-full relative z-10 p-6 space-y-6 pb-32">
           {showSettings ? (
-            <div className="h-full w-full p-6">
+            <div className="h-full w-full">
                 <SettingsView />
             </div>
           ) : (
-             <div className="p-6 space-y-6">
+             <>
                 {/* ── Metric Cards ────────────────────────── */}
                 <div className="grid grid-cols-4 gap-4">
                     {[
@@ -243,271 +219,147 @@ export default function AegisDashboard() {
                     ))}
                 </div>
 
-                {/* ── Main Grid ───────────────────────────── */}
+                {/* ── Dynamic Main Component ───────────────────────────── */}
                 {activeMode === 'overview' && (
                     <div className="grid grid-cols-12 gap-4">
-                        {/* Threat Monitor — 8 cols */}
                         <motion.div
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                         className="col-span-8 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden"
                         >
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                            <div className="flex items-center gap-2">
-                            <Activity className="w-4 h-4 text-emerald-400" />
-                            <h3 className="text-[13px] font-semibold text-white/80">Threat Monitor</h3>
+                            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+                                <div className="flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-emerald-400" />
+                                <h3 className="text-[13px] font-semibold text-white/80">Threat Monitor</h3>
+                                </div>
+                                <span className="text-[10px] text-white/30 font-medium">Live Feed</span>
                             </div>
-                            <span className="text-[10px] text-white/30 font-medium">Live Feed</span>
-                        </div>
 
-                        {/* Table Header */}
-                        <div className="grid grid-cols-12 px-5 py-2.5 border-b border-white/[0.04] text-[10px] font-medium text-white/30 uppercase tracking-wider">
-                            <span className="col-span-2">ID</span>
-                            <span className="col-span-3">Type</span>
-                            <span className="col-span-2">Severity</span>
-                            <span className="col-span-2">Target</span>
-                            <span className="col-span-2">Status</span>
-                            <span className="col-span-1">Time</span>
-                        </div>
-
-                        {/* Table Rows */}
-                        {THREATS.map((threat, i) => {
-                            const sev = severityConfig[threat.severity];
-                            const stat = statusConfig[threat.status];
-                            return (
-                            <motion.div
-                                key={threat.id}
-                                initial={{ opacity: 0, x: -8 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 + i * 0.05 }}
-                                className="grid grid-cols-12 px-5 py-3 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
-                            >
-                                <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.id}</span>
-                                <span className="col-span-3 text-[11px] font-medium text-white/70">{threat.type}</span>
-                                <span className="col-span-2">
-                                <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${sev.text} ${sev.bg} ${sev.border} border px-2 py-0.5 rounded-full`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
-                                    {threat.severity}
-                                </span>
-                                </span>
-                                <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.target}</span>
-                                <span className={`col-span-2 text-[11px] font-medium ${stat.text}`}>{stat.label}</span>
-                                <span className="col-span-1 text-[10px] text-white/30">{threat.timestamp}</span>
-                            </motion.div>
-                            );
-                        })}
-                        </motion.div>
-
-                        {/* Protocol Health — 4 cols */}
-                        <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.25 }}
-                        className="col-span-4 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden"
-                        >
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                            <div className="flex items-center gap-2">
-                            <Lock className="w-4 h-4 text-emerald-400" />
-                            <h3 className="text-[13px] font-semibold text-white/80">Protocol Health</h3>
+                            <div className="grid grid-cols-12 px-5 py-2.5 border-b border-white/[0.04] text-[10px] font-medium text-white/30 uppercase tracking-wider">
+                                <span className="col-span-2">ID</span>
+                                <span className="col-span-3">Type</span>
+                                <span className="col-span-2">Severity</span>
+                                <span className="col-span-2">Target</span>
+                                <span className="col-span-2">Status</span>
+                                <span className="col-span-1">Time</span>
                             </div>
-                        </div>
 
-                        <div className="p-5 space-y-5">
-                            {/* Maturity */}
-                            <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-[11px] text-white/40">Maturity Level</span>
-                                <span className="text-xs font-bold text-emerald-400">Level 3</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                            {THREATS.map((threat, i) => {
+                                const sev = severityConfig[threat.severity];
+                                const stat = statusConfig[threat.status];
+                                return (
                                 <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: '75%' }}
-                                transition={{ delay: 0.5, duration: 0.8 }}
-                                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
-                                />
-                            </div>
-                            </div>
-
-                            {/* Trust Zones */}
-                            <div>
-                            <span className="text-[11px] text-white/40 block mb-3">Trust Zones</span>
-                            <div className="space-y-2">
-                                {[
-                                { zone: 'Admin', level: 'High', color: 'text-red-400' },
-                                { zone: 'Oracle', level: 'Medium', color: 'text-yellow-400' },
-                                { zone: 'User', level: 'Low', color: 'text-emerald-400' },
-                                ].map((z) => (
-                                <div key={z.zone} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-                                    <span className="text-[11px] text-white/60 font-medium">{z.zone}</span>
-                                    <span className={`text-[10px] font-semibold ${z.color}`}>{z.level}</span>
-                                </div>
-                                ))}
-                            </div>
-                            </div>
-
-                            {/* Hazards */}
-                            <div>
-                            <span className="text-[11px] text-white/40 block mb-3">Active Hazards</span>
-                            <div className="p-3 rounded-lg bg-orange-500/[0.06] border border-orange-500/15">
-                                <div className="flex items-start gap-2.5">
-                                <AlertTriangle className="w-3.5 h-3.5 text-orange-400 mt-0.5 shrink-0" />
-                                <div>
-                                    <p className="text-[11px] font-medium text-orange-300">Single-Step Ownership</p>
-                                    <p className="text-[10px] text-orange-400/50 mt-0.5">Recommend 2-step transfer pattern</p>
-                                </div>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
+                                    key={threat.id}
+                                    initial={{ opacity: 0, x: -8 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 + i * 0.05 }}
+                                    className="grid grid-cols-12 px-5 py-3 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                                >
+                                    <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.id}</span>
+                                    <span className="col-span-3 text-[11px] font-medium text-white/70">{threat.type}</span>
+                                    <span className="col-span-2">
+                                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${sev.text} ${sev.bg} ${sev.border} border px-2 py-0.5 rounded-full`}>
+                                        <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                                        {threat.severity}
+                                    </span>
+                                    </span>
+                                    <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.target}</span>
+                                    <span className={`col-span-2 text-[11px] font-medium ${stat.text}`}>{stat.label}</span>
+                                    <span className="col-span-1 text-[10px] text-white/30">{threat.timestamp}</span>
+                                </motion.div>
+                                );
+                            })}
                         </motion.div>
+
+                        <div className="col-span-4 h-full">
+                           <AegisSovereignty />
+                        </div>
                     </div>
                 )}
 
                 {activeMode === 'audit' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px]">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <AegisSovereignty />
                     </motion.div>
                 )}
 
                 {activeMode === 'forensics' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px]">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <ForensicIntel />
                     </motion.div>
                 )}
 
                 {activeMode === 'stress' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px]">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <EconomicEngine />
                     </motion.div>
                 )}
 
-                {/* ── Bottom Row ──────────────────────────── */}
-                <div className="grid grid-cols-12 gap-4">
+                {activeMode === 'wallets' && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        <WalletManager />
+                    </motion.div>
+                )}
 
-                    {/* Neural Mission Logs — 5 cols */}
+                <div className="grid grid-cols-12 gap-4 pt-4">
                     <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="col-span-5 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="col-span-12 lg:col-span-4 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden h-[340px] flex flex-col"
                     >
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                        <div className="flex items-center gap-2">
-                        <Terminal className="w-4 h-4 text-emerald-400" />
-                        <h3 className="text-[13px] font-semibold text-white/80">Neural Mission Logs</h3>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+                            <div className="flex items-center gap-2">
+                                <Terminal className="w-4 h-4 text-emerald-400" />
+                                <h3 className="text-[13px] font-semibold text-white/80">Neural Mission Logs</h3>
+                            </div>
+                            <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                Live
+                            </span>
                         </div>
-                        <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Live
-                        </span>
-                    </div>
-
-                    <div className="p-4 space-y-1.5 font-mono text-[11px] max-h-[280px] overflow-y-auto">
-                        <AnimatePresence>
-                        {logs.map((log, i) => (
-                        <motion.div
-                            key={i + log}
-                            initial={{ opacity: 0, x: -6 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                            className="flex gap-3 py-1.5 hover:bg-white/[0.02] px-2 rounded transition-colors"
-                        >
-                            <span className="text-emerald-400/80 shrink-0 select-none">AEGIS &gt;</span>
-                            <span className="text-white/60">{log}</span>
-                        </motion.div>
-                        ))}
-                        </AnimatePresence>
-                    </div>
+                        <div className="p-4 space-y-1.5 font-mono text-[11px] overflow-y-auto flex-1">
+                            <AnimatePresence>
+                            {logs.map((log, i) => (
+                                <motion.div
+                                    key={i + log}
+                                    initial={{ opacity: 0, x: -6 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="flex gap-3 py-1.5 hover:bg-white/[0.02] px-2 rounded transition-colors"
+                                >
+                                    <span className="text-emerald-400/80 shrink-0 select-none">AEGIS &gt;</span>
+                                    <span className="text-white/60">{log}</span>
+                                </motion.div>
+                            ))}
+                            </AnimatePresence>
+                        </div>
                     </motion.div>
 
-                    {/* Remediation Lab — 7 cols */}
-                    <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.35 }}
-                    className={`col-span-7 rounded-xl border bg-[#0c0f0d] overflow-hidden transition-all duration-700 ${isPaused ? 'border-emerald-500 shadow-[0_0_30px_rgba(34,197,94,0.15)]' : 'border-white/[0.06]'}`}
-                    >
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                        <div className="flex items-center gap-2">
-                        <FileCode className="w-4 h-4 text-emerald-400" />
-                        <h3 className="text-[13px] font-semibold text-white/80">Remediation Lab</h3>
-                        </div>
-                        {isPaused ? (
-                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest animate-pulse">
-                                Awaiting Human Directive
-                            </span>
-                        ) : (
-                            <span className="text-[10px] font-medium text-emerald-400 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                                Patch Verified
-                            </span>
-                        )}
+                    <div className="col-span-12 lg:col-span-8">
+                        {/* RESTORED COMPONENT INTEGRATION */}
+                        <RemediationLab status={status} />
                     </div>
-
-                    <div className="p-5 space-y-5">
-                        <div className="flex items-start justify-between">
-                        <div>
-                            <p className="text-[11px] text-white/40 mb-1">Target Vulnerability</p>
-                            <p className="text-sm font-semibold text-white">
-                                {status?.findings?.[0]?.vulnerability || "Modular Reentrancy (Compound/Rari)"}
-                            </p>
-                        </div>
-                        <span className="text-[10px] font-medium text-red-400 px-2 py-1 bg-red-500/10 border border-red-500/20 rounded-full">
-                            Critical
-                        </span>
-                        </div>
-
-                        {/* Code Block */}
-                        <div className="rounded-lg bg-[#080a09] border border-white/[0.05] overflow-hidden">
-                        <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.04] bg-white/[0.02]">
-                            <span className="text-[10px] text-white/30 font-mono">CEI-Enforcement.sol</span>
-                            <span className="text-[10px] text-emerald-400/60">Patch Blueprint</span>
-                        </div>
-                        <pre className="p-4 font-mono text-[11px] text-emerald-400/80 leading-relaxed overflow-x-auto whitespace-pre">
-{status?.findings?.[0]?.patch || `uint balanceBefore = token.balanceOf(address(this));
-
-// Enforce Checks-Effects-Interactions
-_enterCriticalSection();
-_updateInternalState(amount);
-_executeExternalCall(target, data);
-
-require(
-  token.balanceOf(address(this)) >= balanceBefore,
-  "Aegis: Invariant violation"
-);`}
-                        </pre>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-3 pt-2">
-                        {isPaused && pending ? (
-                            <button 
-                                onClick={handleApprove}
-                                className="w-full py-3 rounded-lg bg-emerald-500 text-black text-[12px] font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] transition-all"
-                            >
-                                Grant Human Directive: Apply Patch
-                            </button>
-                        ) : (
-                            <>
-                                <button className="flex-1 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[11px] font-medium text-white/60 hover:bg-white/[0.06] hover:text-white/80 transition-all">
-                                    Simulate on Fork
-                                </button>
-                                <button className="flex-1 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400 hover:bg-emerald-500/15 transition-all flex items-center justify-center gap-2">
-                                    Deploy Patch
-                                    <ChevronRight className="w-3.5 h-3.5" />
-                                </button>
-                            </>
-                        )}
-                        </div>
-                    </div>
-                    </motion.div>
                 </div>
-
-             </div>
+             </>
           )}
         </div>
+
+        {/* RESTORED BOTTOM FOOTER (TERMINATE/EXECUTE) */}
+        {!showSettings && (
+            <footer className="absolute bottom-0 left-0 right-0 p-8 flex justify-center gap-10 bg-gradient-to-t from-[#0a0f0d] via-[#0a0f0d]/80 to-transparent z-50 pointer-events-none">
+                <div className="pointer-events-auto flex items-center gap-6 p-2 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
+                    <GlowButton variant="secondary" className="px-10 py-4 text-[10px] tracking-[0.2em] font-black rounded-xl">
+                        TERMINATE
+                    </GlowButton>
+                    <GlowButton variant="primary" className="px-14 py-4 text-[10px] tracking-[0.2em] font-black transform transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(34,197,94,0.2)] rounded-xl">
+                        EXECUTE REMEDIATION
+                    </GlowButton>
+                </div>
+            </footer>
+        )}
       </main>
     </div>
   );
