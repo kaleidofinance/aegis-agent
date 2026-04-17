@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SettingsView } from '../components/SettingsView';
+import { ForensicIntel } from '../components/ForensicIntel';
+import { EconomicEngine } from '../components/EconomicEngine';
+import { AegisSovereignty } from '../components/AegisSovereignty';
 import {
   Shield, Activity, Search, Zap, AlertTriangle, CheckCircle2,
   ChevronRight, ExternalLink, Clock, TrendingUp, Lock,
@@ -241,134 +244,144 @@ export default function AegisDashboard() {
                 </div>
 
                 {/* ── Main Grid ───────────────────────────── */}
-                <div className="grid grid-cols-12 gap-4">
-
-                    {/* Threat Monitor — 8 cols */}
-                    <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="col-span-8 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden"
-                    >
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                        <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-emerald-400" />
-                        <h3 className="text-[13px] font-semibold text-white/80">Threat Monitor</h3>
-                        </div>
-                        <span className="text-[10px] text-white/30 font-medium">Live Feed</span>
-                    </div>
-
-                    {/* Table Header */}
-                    <div className="grid grid-cols-12 px-5 py-2.5 border-b border-white/[0.04] text-[10px] font-medium text-white/30 uppercase tracking-wider">
-                        <span className="col-span-2">ID</span>
-                        <span className="col-span-3">Type</span>
-                        <span className="col-span-2">Severity</span>
-                        <span className="col-span-2">Target</span>
-                        <span className="col-span-2">Status</span>
-                        <span className="col-span-1">Time</span>
-                    </div>
-
-                    {/* Table Rows */}
-                    {THREATS.map((threat, i) => {
-                        const sev = severityConfig[threat.severity];
-                        const stat = statusConfig[threat.status];
-                        return (
+                {activeMode === 'overview' && (
+                    <div className="grid grid-cols-12 gap-4">
+                        {/* Threat Monitor — 8 cols */}
                         <motion.div
-                            key={threat.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 + i * 0.05 }}
-                            className="grid grid-cols-12 px-5 py-3 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="col-span-8 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden"
                         >
-                            <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.id}</span>
-                            <span className="col-span-3 text-[11px] font-medium text-white/70">{threat.type}</span>
-                            <span className="col-span-2">
-                            <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${sev.text} ${sev.bg} ${sev.border} border px-2 py-0.5 rounded-full`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
-                                {threat.severity}
-                            </span>
-                            </span>
-                            <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.target}</span>
-                            <span className={`col-span-2 text-[11px] font-medium ${stat.text}`}>{stat.label}</span>
-                            <span className="col-span-1 text-[10px] text-white/30">{threat.timestamp}</span>
-                        </motion.div>
-                        );
-                    })}
-                    </motion.div>
-
-                    {/* Protocol Health — 4 cols */}
-                    <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
-                    className="col-span-4 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden"
-                    >
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                        <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-emerald-400" />
-                        <h3 className="text-[13px] font-semibold text-white/80">Protocol Health</h3>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+                            <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-emerald-400" />
+                            <h3 className="text-[13px] font-semibold text-white/80">Threat Monitor</h3>
+                            </div>
+                            <span className="text-[10px] text-white/30 font-medium">Live Feed</span>
                         </div>
-                    </div>
 
-                    <div className="p-5 space-y-5">
-                        {/* Maturity */}
-                        <div>
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] text-white/40">Maturity Level</span>
-                            <span className="text-xs font-bold text-emerald-400">Level 3</span>
+                        {/* Table Header */}
+                        <div className="grid grid-cols-12 px-5 py-2.5 border-b border-white/[0.04] text-[10px] font-medium text-white/30 uppercase tracking-wider">
+                            <span className="col-span-2">ID</span>
+                            <span className="col-span-3">Type</span>
+                            <span className="col-span-2">Severity</span>
+                            <span className="col-span-2">Target</span>
+                            <span className="col-span-2">Status</span>
+                            <span className="col-span-1">Time</span>
                         </div>
-                        <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+
+                        {/* Table Rows */}
+                        {THREATS.map((threat, i) => {
+                            const sev = severityConfig[threat.severity];
+                            const stat = statusConfig[threat.status];
+                            return (
                             <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: '75%' }}
-                            transition={{ delay: 0.5, duration: 0.8 }}
-                            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
-                            />
-                        </div>
-                        </div>
+                                key={threat.id}
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 + i * 0.05 }}
+                                className="grid grid-cols-12 px-5 py-3 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                            >
+                                <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.id}</span>
+                                <span className="col-span-3 text-[11px] font-medium text-white/70">{threat.type}</span>
+                                <span className="col-span-2">
+                                <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${sev.text} ${sev.bg} ${sev.border} border px-2 py-0.5 rounded-full`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                                    {threat.severity}
+                                </span>
+                                </span>
+                                <span className="col-span-2 text-[11px] font-mono text-white/50">{threat.target}</span>
+                                <span className={`col-span-2 text-[11px] font-medium ${stat.text}`}>{stat.label}</span>
+                                <span className="col-span-1 text-[10px] text-white/30">{threat.timestamp}</span>
+                            </motion.div>
+                            );
+                        })}
+                        </motion.div>
 
-                        {/* Trust Zones */}
-                        <div>
-                        <span className="text-[11px] text-white/40 block mb-3">Trust Zones</span>
-                        <div className="space-y-2">
-                            {[
-                            { zone: 'Admin', level: 'High', color: 'text-red-400' },
-                            { zone: 'Oracle', level: 'Medium', color: 'text-yellow-400' },
-                            { zone: 'User', level: 'Low', color: 'text-emerald-400' },
-                            ].map((z) => (
-                            <div key={z.zone} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-                                <span className="text-[11px] text-white/60 font-medium">{z.zone}</span>
-                                <span className={`text-[10px] font-semibold ${z.color}`}>{z.level}</span>
+                        {/* Protocol Health — 4 cols */}
+                        <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25 }}
+                        className="col-span-4 rounded-xl border border-white/[0.06] bg-[#0c0f0d] overflow-hidden"
+                        >
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+                            <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4 text-emerald-400" />
+                            <h3 className="text-[13px] font-semibold text-white/80">Protocol Health</h3>
                             </div>
-                            ))}
-                        </div>
                         </div>
 
-                        {/* Hazards */}
-                        <div>
-                        <span className="text-[11px] text-white/40 block mb-3">Active Hazards</span>
-                        <div className="p-3 rounded-lg bg-orange-500/[0.06] border border-orange-500/15">
-                            <div className="flex items-start gap-2.5">
-                            <AlertTriangle className="w-3.5 h-3.5 text-orange-400 mt-0.5 shrink-0" />
+                        <div className="p-5 space-y-5">
+                            {/* Maturity */}
                             <div>
-                                <p className="text-[11px] font-medium text-orange-300">Single-Step Ownership</p>
-                                <p className="text-[10px] text-orange-400/50 mt-0.5">Recommend 2-step transfer pattern</p>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[11px] text-white/40">Maturity Level</span>
+                                <span className="text-xs font-bold text-emerald-400">Level 3</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                                <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: '75%' }}
+                                transition={{ delay: 0.5, duration: 0.8 }}
+                                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
+                                />
                             </div>
                             </div>
-                        </div>
-                        </div>
 
-                        {/* Coverage */}
-                        <div className="flex items-center justify-between pt-3 border-t border-white/[0.04]">
-                        <span className="text-[11px] text-white/40">Coverage</span>
-                        <div className="flex items-center gap-1.5">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                            <span className="text-[11px] font-semibold text-emerald-400">Omni-Chain</span>
+                            {/* Trust Zones */}
+                            <div>
+                            <span className="text-[11px] text-white/40 block mb-3">Trust Zones</span>
+                            <div className="space-y-2">
+                                {[
+                                { zone: 'Admin', level: 'High', color: 'text-red-400' },
+                                { zone: 'Oracle', level: 'Medium', color: 'text-yellow-400' },
+                                { zone: 'User', level: 'Low', color: 'text-emerald-400' },
+                                ].map((z) => (
+                                <div key={z.zone} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                                    <span className="text-[11px] text-white/60 font-medium">{z.zone}</span>
+                                    <span className={`text-[10px] font-semibold ${z.color}`}>{z.level}</span>
+                                </div>
+                                ))}
+                            </div>
+                            </div>
+
+                            {/* Hazards */}
+                            <div>
+                            <span className="text-[11px] text-white/40 block mb-3">Active Hazards</span>
+                            <div className="p-3 rounded-lg bg-orange-500/[0.06] border border-orange-500/15">
+                                <div className="flex items-start gap-2.5">
+                                <AlertTriangle className="w-3.5 h-3.5 text-orange-400 mt-0.5 shrink-0" />
+                                <div>
+                                    <p className="text-[11px] font-medium text-orange-300">Single-Step Ownership</p>
+                                    <p className="text-[10px] text-orange-400/50 mt-0.5">Recommend 2-step transfer pattern</p>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
                         </div>
-                        </div>
+                        </motion.div>
                     </div>
+                )}
+
+                {activeMode === 'audit' && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px]">
+                        <AegisSovereignty />
                     </motion.div>
-                </div>
+                )}
+
+                {activeMode === 'forensics' && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px]">
+                        <ForensicIntel />
+                    </motion.div>
+                )}
+
+                {activeMode === 'stress' && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[400px]">
+                        <EconomicEngine />
+                    </motion.div>
+                )}
 
                 {/* ── Bottom Row ──────────────────────────── */}
                 <div className="grid grid-cols-12 gap-4">
