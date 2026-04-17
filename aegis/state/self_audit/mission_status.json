@@ -1,0 +1,8 @@
+{
+    "target": "/Users/macking/Downloads/kaleido/kaleido-main/kaleido-aegis/aegis",
+    "mode": "full",
+    "model": "gemini-3.1-pro",
+    "current_phase": "PHASE_02_RECON",
+    "findings": [],
+    "status": "READY"
+}

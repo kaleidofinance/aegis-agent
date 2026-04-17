@@ -1,0 +1,24 @@
+# Aegis Agent v10.0 Sovereign Dependencies
+# --- Core Intelligence ---
+pydantic
+sqlite3-api
+json-rpc
+
+# --- EVM / Solidity ---
+web3
+eth-account
+solc-select
+slither-analyzer
+
+# --- SVM / Solana ---
+solana
+solders
+anchorpy
+
+# --- MOVE / Sui ---
+pysui
+
+# --- AI & L402 ---
+requests
+ollama
+l402
